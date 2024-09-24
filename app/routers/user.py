@@ -29,12 +29,13 @@ async def user_by_id(db: Annotated[Session, Depends(get_db)], user_id: int):
 
 @router.post("/create")
 async def create_user(db: Annotated[Session, Depends(get_db)], create_user: CreateUser):
-    user = db.execute(select(User).where(User.username == create_user.username))
-    if user is None:
+    user = db.execute(select(User).where(User.username == create_user.username)).first()
+    if not user:
         db.execute(insert(User).values(username=create_user.username,
                                    firstname=create_user.firstname,
                                    lastname=create_user.lastname,
-                                   age=create_user.age))
+                                   age=create_user.age,
+                                   slug= create_user.username))
         db.commit()
         return {
             'status_code': status.HTTP_201_CREATED,
